@@ -1,61 +1,402 @@
+<!doctype html>
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Mel's site</title>
-        <script
-            language="javascript"
-            type="text/javascript"
-            src="libraries/p5.js"
-        ></script>
-        <script
-            langauge="javascript"
-            type="text/javascript"
-            src="libraries/matter.js"
-        ></script>
+        <title>3D grid display</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap"
+            rel="stylesheet"
+        />
         <link
             rel="icon"
             type="image/png"
             sizes="32x32"
             href="images/favicon-32x32.png"
         />
-        <link rel="stylesheet" href="css/main.css" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
-            rel="stylesheet"
-        />
+        <style>
+            :root {
+                --bg-color: white;
+                --text-color: black;
+                --module-color: black;
+                --module-text-color: white;
+            }
+            @media (prefers-color-scheme: dark) {
+                :root {
+                    --bg-color: black;
+                    --text-color: white;
+                    --module-color: white;
+                    --module-text-color: black;
+                }
+            }
+            body,
+            html {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                overflow: hidden;
+                font-family: "Ubuntu Mono", monospace;
+                background-color: var(--bg-color);
+                color: var(--text-color);
+            }
+            #container {
+                width: 100%;
+                height: 100%;
+                perspective: 1000px;
+            }
+            #grid {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform-style: preserve-3d;
+                transform: rotateX(30deg) rotateZ(15deg) translate(-50%, -50%);
+                transition: transform 0.5s ease;
+            }
+            .module {
+                position: absolute;
+                width: 100px;
+                height: 100px;
+                background: var(--module-color);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 14px;
+                cursor: pointer;
+                color: var(--module-text-color);
+                transition:
+                    transform 0.5s ease,
+                    opacity 0.5s ease;
+                border: 2px solid var(--module-text-color);
+                box-shadow:
+                    inset 2px 2px 2px rgba(255, 255, 255, 0.2),
+                    inset -2px -2px 2px rgba(0, 0, 0, 0.2);
+            }
+            #info-panel {
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                background: var(--bg-color);
+                color: var(--text-color);
+                padding: 20px;
+                border-radius: 10px;
+                max-width: 300px;
+                display: none;
+                border: 2px solid var(--text-color);
+            }
+            #module-content {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: var(--bg-color);
+                color: var(--text-color);
+                padding: 40px;
+                border-radius: 10px;
+                max-width: 80%;
+                max-height: 80%;
+                overflow-y: auto;
+                display: none;
+                border: 2px solid var(--text-color);
+                text-align: center;
+                opacity: 0;
+                transition: opacity 0.5s ease;
+            }
+            #module-content img {
+                max-width: 100%;
+                height: auto;
+                margin-bottom: 20px;
+            }
+            button {
+                background: var(--text-color);
+                color: var(--bg-color);
+                border: none;
+                padding: 10px 20px;
+                margin-top: 10px;
+                cursor: pointer;
+                font-weight: bold;
+                font-family: "Ubuntu Mono", monospace;
+            }
+            button:hover {
+                opacity: 0.8;
+            }
+            #return-btn {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                display: none;
+            }
+            #pan-controls {
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                gap: 10px;
+            }
+        </style>
     </head>
     <body>
-        <div>
-            <div class=""></div>
-            <div class="title">mel-1989</div>
-            <br />
-            <header>
-                <a href="index.html" class="h1_current">home</a>
-                <a href="projects.html" class="h1">projects</a>
-                <a href="about.html" class="h1">about</a>
-                <a href="sim.html" class="h1">cool thing</a>
-            </header>
-            <div class=""></div>
-            <a href="https://www.x.com" class="links" id="links"></a>
-            <span
-                class="links"
-                style="color: white; cursor: pointer"
-                onclick="window.location.href='https://x.com/Melicus_';"
-            >
-                x
-            </span>
-            <p></p>
-            <a href="https://www.github.com" class="links" id="links"></a>
-            <span
-                class="links"
-                style="color: white; cursor: pointer"
-                onclick="window.location.href='https://github.com/mel-1989';"
-            >
-                github
-            </span>
+        <div id="container">
+            <div id="grid"></div>
         </div>
+        <div id="info-panel">
+            <h2 id="module-name"></h2>
+            <p id="module-description"></p>
+            <button id="descend-btn">Enter</button>
+        </div>
+        <div id="module-content">
+            <img
+                id="module-image"
+                src=""
+                alt="Module Image"
+                style="display: none"
+            />
+            <h2 id="content-title"></h2>
+            <p id="content-text"></p>
+            <a id="content-link" href="#" target="_blank">Learn More</a>
+        </div>
+        <button id="return-btn">Exit</button>
+        <div id="pan-controls">
+            <button id="pan-left">Pan Left</button>
+            <button id="pan-right">Pan Right</button>
+        </div>
+
+        <script>
+            const grid = document.getElementById("grid");
+            const infoPanel = document.getElementById("info-panel");
+            const moduleName = document.getElementById("module-name");
+            const moduleDescription =
+                document.getElementById("module-description");
+            const descendBtn = document.getElementById("descend-btn");
+            const returnBtn = document.getElementById("return-btn");
+            const panLeftBtn = document.getElementById("pan-left");
+            const panRightBtn = document.getElementById("pan-right");
+            const moduleContent = document.getElementById("module-content");
+            const moduleImage = document.getElementById("module-image");
+            const contentTitle = document.getElementById("content-title");
+            const contentText = document.getElementById("content-text");
+            const contentLink = document.getElementById("content-link");
+
+            const modules = [
+                {
+                    name: "About me",
+                    description: "yes, a real living human being",
+                    content: {
+                        title: "About Me",
+                        text: "Hi! I'm mel-1989. I am a student interested in cs, ml, economics, policy and more. My hobbies include consuming sci-fi/fantasy book slop, nonfiction book nonslop, anime, movies, and difficult games.",
+                        image: "images/misatopfp.png",
+                        link: "",
+                    },
+                },
+                {
+                    name: "Github",
+                    description: "don't look at my commit history lol",
+                    content: {
+                        title: "My GitHub",
+                        text: "Check out my latest projects and contributions.",
+                        image: "",
+                        link: "https://github.com/mel-1989",
+                    },
+                },
+                {
+                    name: "x.com",
+                    description: "gotta rep the socials",
+                    content: {
+                        title: "Follow me on X",
+                        text: "Stay updated with my latest thoughts and projects.",
+                        image: "",
+                        link: "https://x.com/Melicus_",
+                    },
+                },
+                {
+                    name: "TBD?",
+                    description: "A garden where unknown fauna may yet grow",
+                    content: {
+                        title: "Garden",
+                        text: "",
+                        image: "images/cbonsai.png",
+                        link: "",
+                    },
+                },
+                {
+                    name: "...",
+                    description: "...",
+                    content: {
+                        title: "Mystery Module",
+                        text: "What secrets lie within? Only one way to find out...",
+                        image: "",
+                        link: "",
+                    },
+                },
+                {
+                    name: "",
+                    description: "",
+                    content: {
+                        title: "Empty Space",
+                        text: "This module is intentionally left blank. Or is it?",
+                        image: "/api/placeholder/400/300",
+                        link: "#",
+                    },
+                },
+            ];
+
+            let activeModule = null;
+            let moduleElements = [];
+            let currentRotation = 15; // Starting rotation
+
+            function createModule(module, x, y) {
+                const elem = document.createElement("div");
+                elem.className = "module";
+                elem.textContent = module.name;
+                const transform = `translate3d(${x * 120}px, ${y * 120}px, 0)`;
+                elem.style.transform = transform;
+                elem.addEventListener("click", () =>
+                    selectModule(elem, module),
+                );
+
+                moduleElements.push({ elem, originalTransform: transform });
+                return elem;
+            }
+
+            function initGrid() {
+                for (let y = -1; y <= 1; y++) {
+                    for (let x = -1; x <= 1; x++) {
+                        const index = (y + 1) * 3 + (x + 1);
+                        if (index < modules.length) {
+                            grid.appendChild(
+                                createModule(modules[index], x, y),
+                            );
+                        }
+                    }
+                }
+            }
+
+            function selectModule(elem, module) {
+                if (activeModule) {
+                    activeModule.style.transform =
+                        activeModule.style.transform.replace(
+                            " translateZ(50px)",
+                            "",
+                        );
+                }
+                activeModule = elem;
+                elem.style.transform += " translateZ(50px)";
+
+                moduleName.textContent = module.name;
+                moduleDescription.textContent = module.description;
+                infoPanel.style.display = "block";
+
+                // Prepare content for the module
+                if (module.content.image) {
+                    moduleImage.src = module.content.image;
+                    moduleImage.style.display = "block";
+                } else {
+                    moduleImage.style.display = "none";
+                }
+                contentTitle.textContent = module.content.title;
+                contentText.textContent = module.content.text;
+                contentLink.href = module.content.link;
+                if (module.content.link === "#") {
+                    contentLink.style.display = "none";
+                } else {
+                    contentLink.style.display = "inline";
+                }
+            }
+
+            function descendGrid() {
+                moduleElements.forEach(({ elem }) => {
+                    if (elem !== activeModule) {
+                        elem.style.transform += " translateY(1000px)";
+                        elem.style.opacity = "0";
+                    }
+                });
+                activeModule.style.transform =
+                    "translate3d(0, 0, 200px) scale(1.5)";
+                grid.style.transform =
+                    "rotateX(0deg) rotateZ(0deg) translate(-50%, -50%)";
+                infoPanel.style.display = "none";
+                returnBtn.style.display = "block";
+                document.getElementById("pan-controls").style.display = "none";
+
+                // Delay showing the module content
+                setTimeout(() => {
+                    moduleContent.style.display = "block";
+                    setTimeout(() => {
+                        moduleContent.style.opacity = "1";
+                    }, 50);
+                }, 500);
+            }
+
+            function returnToGrid() {
+                moduleContent.style.opacity = "0";
+                setTimeout(() => {
+                    moduleContent.style.display = "none";
+                    moduleElements.forEach(({ elem, originalTransform }) => {
+                        elem.style.transform = originalTransform;
+                        elem.style.opacity = "1";
+                    });
+                    updateGridRotation();
+                    activeModule = null;
+                    infoPanel.style.display = "none";
+                    returnBtn.style.display = "none";
+                    document.getElementById("pan-controls").style.display =
+                        "flex";
+                }, 500);
+            }
+
+            function updateGridRotation() {
+                grid.style.transform = `rotateX(30deg) rotateZ(${currentRotation}deg) translate(-50%, -50%)`;
+            }
+
+            function panLeft() {
+                currentRotation = Math.max(15, currentRotation - 30);
+                updateGridRotation();
+            }
+
+            function panRight() {
+                currentRotation = Math.min(75, currentRotation + 30);
+                updateGridRotation();
+            }
+
+            initGrid();
+            descendBtn.addEventListener("click", descendGrid);
+            returnBtn.addEventListener("click", returnToGrid);
+            panLeftBtn.addEventListener("click", panLeft);
+            panRightBtn.addEventListener("click", panRight);
+
+            // Check initial color scheme preference and set up listener for changes
+            function setColorScheme(isDark) {
+                document.documentElement.className = isDark
+                    ? "dark-mode"
+                    : "light-mode";
+            }
+
+            if (
+                window.matchMedia &&
+                window.matchMedia("(prefers-color-scheme: dark)").matches
+            ) {
+                setColorScheme(true);
+            } else {
+                setColorScheme(false);
+            }
+
+            window
+                .matchMedia("(prefers-color-scheme: dark)")
+                .addEventListener("change", (e) => {
+                    setColorScheme(e.matches);
+                });
+            document.addEventListener("keydown", function (event) {
+                if (event.code === "Space" || event.key === " ") {
+                    event.preventDefault(); // Prevent space from scrolling the page
+                    if (activeModule) {
+                        if (moduleContent.style.display === "none") {
+                            descendBtn.click(); // Simulate clicking the "Enter" button
+                        } else {
+                            returnBtn.click(); // Simulate clicking the "Exit" button
+                        }
+                    }
+                }
+            });
+        </script>
     </body>
 </html>
