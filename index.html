@@ -49,7 +49,8 @@
                 top: 50%;
                 left: 50%;
                 transform-style: preserve-3d;
-                transform: rotateX(30deg) rotateZ(15deg) translate(-50%, -50%);
+                transform: rotateX(30deg) rotateZ(0deg) rotateY(0deg)
+                    translateX(-50px) translate(-50%, -50%);
                 transition: transform 0.5s ease;
             }
             .module {
@@ -156,10 +157,6 @@
             <a id="content-link" href="#" target="_blank">Learn More</a>
         </div>
         <button id="return-btn">Exit</button>
-        <div id="pan-controls">
-            <button id="pan-left">Pan Left</button>
-            <button id="pan-right">Pan Right</button>
-        </div>
 
         <script>
             const grid = document.getElementById("grid");
@@ -169,8 +166,6 @@
                 document.getElementById("module-description");
             const descendBtn = document.getElementById("descend-btn");
             const returnBtn = document.getElementById("return-btn");
-            const panLeftBtn = document.getElementById("pan-left");
-            const panRightBtn = document.getElementById("pan-right");
             const moduleContent = document.getElementById("module-content");
             const moduleImage = document.getElementById("module-image");
             const contentTitle = document.getElementById("content-title");
@@ -313,7 +308,7 @@
                 activeModule.style.transform =
                     "translate3d(0, 0, 200px) scale(1.5)";
                 grid.style.transform =
-                    "rotateX(0deg) rotateZ(0deg) translate(-50%, -50%)";
+                    "rotateX(30deg) rotateZ(0deg) rotateY(0deg) translateX(-50px) translate(-50%, -50%)";
                 infoPanel.style.display = "none";
                 returnBtn.style.display = "block";
                 document.getElementById("pan-controls").style.display = "none";
@@ -345,7 +340,7 @@
             }
 
             function updateGridRotation() {
-                grid.style.transform = `rotateX(30deg) rotateZ(${currentRotation}deg) translate(-50%, -50%)`;
+                grid.style.transform = `rotateX(30deg) rotateZ(0deg) rotateY(0deg) translateX(-50px) translate(-50%, -50%)`;
             }
 
             function panLeft() {
@@ -361,8 +356,6 @@
             initGrid();
             descendBtn.addEventListener("click", descendGrid);
             returnBtn.addEventListener("click", returnToGrid);
-            panLeftBtn.addEventListener("click", panLeft);
-            panRightBtn.addEventListener("click", panRight);
 
             // Check initial color scheme preference and set up listener for changes
             function setColorScheme(isDark) {
