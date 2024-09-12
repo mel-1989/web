@@ -311,7 +311,6 @@
                     "rotateX(30deg) rotateZ(0deg) rotateY(0deg) translateX(-50px) translate(-50%, -50%)";
                 infoPanel.style.display = "none";
                 returnBtn.style.display = "block";
-                document.getElementById("pan-controls").style.display = "none";
 
                 // Delay showing the module content
                 setTimeout(() => {
@@ -334,8 +333,6 @@
                     activeModule = null;
                     infoPanel.style.display = "none";
                     returnBtn.style.display = "none";
-                    document.getElementById("pan-controls").style.display =
-                        "flex";
                 }, 500);
             }
 
